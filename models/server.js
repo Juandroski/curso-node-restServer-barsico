@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const { dbConnection } = require('../database/config');
+const bodyParser = require('body-parser');
 
 
 class Server {
@@ -9,11 +11,18 @@ class Server {
         this.port = process.env.PORT;
         this.usersPath = '/api/users';
 
+        //Conectar a Base de Datos
+        this.conectarDB();
+        
         //Middlewares
         this.middlewares();
 
         //Rutas de mi aplicacion
         this.routes();
+    }
+
+    async conectarDB(){
+       await dbConnection();
     }
 
     middlewares(){
@@ -26,6 +35,19 @@ class Server {
 
         //Directorio Publico
         this.app.use( express.static('public'));
+
+        // Middlewares
+        this.app.use(bodyParser.json());
+        this.app.use(bodyParser.urlencoded({extended:false}));
+        this.app.use((req, res, next) => {
+        res.header('Access-Control-Allow-Origin', '*');
+        res.header('Access-Control-Allow-Headers', 'Authorization, X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Request-Method');
+        res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+        res.header('Allow', 'GET, POST, OPTIONS, PUT, DELETE');
+        next();
+    });
+
+
     }
 
     routes(){
